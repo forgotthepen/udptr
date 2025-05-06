@@ -10,10 +10,10 @@
 #include <chrono>
 
 
-udptr::adapter my_sender_adapter(udptr::e_mode::v6);
+udptr::adapter my_sender_adapter(udptr::e_mode::ip_v6);
 
 udptr::adapter my_recv_adapter({
-    udptr::e_mode::v6,
+    udptr::e_mode::ip_v6,
     "::1", // "127.0.0.1",
     6056
 });
@@ -72,7 +72,7 @@ int main() {
         std::string ss{};
         std::getline(std::cin, ss);
 
-        if ("q" == ss ||"x" == ss ||"quit" == ss ||"exit" == ss) {
+        if ("q" == ss || "x" == ss || "quit" == ss || "exit" == ss) {
             break;
         }
 

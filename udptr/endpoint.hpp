@@ -31,8 +31,8 @@ SOFTWARE.
 
 namespace udptr {
     enum class e_mode {
-        v4,
-        v6,
+        ip_v4,
+        ip_v6,
     };
 
     class t_endpoint {
@@ -50,8 +50,10 @@ namespace udptr {
         e_mode get_mode() const noexcept;
         std::string get_ip() const noexcept(false);
         uint16_t get_port() const noexcept;
+
         const sockaddr_in& get_underlying_addr_v4() const noexcept(false);
         sockaddr_in& get_underlying_addr_v4() noexcept(false);
+
         const sockaddr_in6& get_underlying_addr_v6() const noexcept(false);
         sockaddr_in6& get_underlying_addr_v6() noexcept(false);
 

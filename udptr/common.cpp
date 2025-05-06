@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 #include "common.hpp"
-#include <cstring> // std::memset
+#include <cstring> // std::memset, std::memcpy
 #include <stdexcept>
 
 

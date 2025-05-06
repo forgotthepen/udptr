@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 #include "sender.hpp"
+#include "common.hpp"
 #include <string> // std::to_string
 #include <stdexcept>
 
@@ -34,19 +35,19 @@ SOFTWARE.
 
 
 namespace udptr {
-    sender::sender(adapter &my_adapter, const t_endpoint &server) noexcept(false):
-        my_adapter_(my_adapter),
+    sender::sender(const adapter &my_adapter, const t_endpoint &server) noexcept(false):
+        my_adapter_(&my_adapter),
         server_( ensure_compat_server(server) )
     {
         switch (server_.get_mode()) {
-        case e_mode::v4: {
+        case e_mode::ip_v4: {
             auto &underlying_addr = server_.get_underlying_addr_v4();
             server_addr = reinterpret_cast<const struct sockaddr *>(&underlying_addr);
             server_addr_len = sizeof(underlying_addr);
         }
         break;
 
-        case e_mode::v6: {
+        case e_mode::ip_v6: {
             auto &underlying_addr = server_.get_underlying_addr_v6();
             server_addr = reinterpret_cast<const struct sockaddr *>(&underlying_addr);
             server_addr_len = sizeof(underlying_addr);
@@ -57,17 +58,17 @@ namespace udptr {
 
     
     t_endpoint sender::ensure_compat_server(const t_endpoint &server) noexcept(false) {
-        const auto my_adapter_mode = my_adapter_.get_config().get_mode();
+        const auto my_adapter_mode = my_adapter_->get_config().get_mode();
         const auto server_mode = server.get_mode();
         if (my_adapter_mode == server_mode) {
             return server;
         }
 
-        if (e_mode::v4 == my_adapter_mode && e_mode::v6 == server_mode) {
+        if (e_mode::ip_v4 == my_adapter_mode && e_mode::ip_v6 == server_mode) {
             throw std::runtime_error("Adapter is using IPv4, but target server is using IPv6, no conversion is possible");
         }
 
-        t_endpoint compat_server(e_mode::v6);
+        t_endpoint compat_server(e_mode::ip_v6);
         compat_server.use_port(server.get_port());
         common::map_ipv4_to_ipv6(compat_server.get_underlying_addr_v6(), server.get_underlying_addr_v4());
         return compat_server;
@@ -75,7 +76,7 @@ namespace udptr {
 
     void sender::send(const char *data, std::size_t size) noexcept(false) {
         long long sent_bytes = ::sendto(
-            my_adapter_.get_underlying_socket(),
+            my_adapter_->get_underlying_socket(),
             data, size, 0,
             server_addr, server_addr_len
         );

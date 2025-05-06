@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 #include "adapter.hpp"
+#include "net-include.hpp"
 #include <utility> // std::move
 #include <cstdlib> // std::size_t
 #include <cstring> // std::memcmp
@@ -46,7 +47,7 @@ namespace udptr {
 
     void adapter::use_config(t_endpoint endpoint) noexcept(false) {
         if (common::INVALID_SOCKET_FD != socket_fd_) {
-            throw std::runtime_error("Adapter is already initialized, close it first");
+            throw std::runtime_error("Adapter is already opened, close it first");
         }
 
         endpoint_ = std::move(endpoint);
@@ -65,16 +66,16 @@ namespace udptr {
             return;
         }
 
-        {
 #ifdef _MSC_VER
-            WSADATA wsaData{};
-            int wsaerr = ::WSAStartup(MAKEWORD(2, 0), &wsaData);
+        {
+            WSADATA wsa_data{};
+            int wsaerr = ::WSAStartup(MAKEWORD(2, 2), &wsa_data);
             if (0 != wsaerr) {
                 close();
                 throw std::runtime_error("Call to WSAStartup() failed, error code=" + std::to_string(wsaerr));
             }
-#endif
         }
+#endif
 
         const sockaddr *addr{};
         std::size_t addr_len = 0;
@@ -82,10 +83,10 @@ namespace udptr {
         bool has_port = false;
 
         switch (endpoint_.get_mode()) {
-        case e_mode::v4: {
+        case e_mode::ip_v4: {
             socket_fd_ = ::socket(AF_INET, SOCK_DGRAM, 0);
 
-            auto &underlying_addr = endpoint_.get_underlying_addr_v4();
+            const auto &underlying_addr = endpoint_.get_underlying_addr_v4();
             addr = reinterpret_cast<const sockaddr *>(&underlying_addr);
             addr_len = sizeof(underlying_addr);
 
@@ -94,10 +95,10 @@ namespace udptr {
         }
         break;
 
-        case e_mode::v6: {
+        case e_mode::ip_v6: {
             socket_fd_ = ::socket(AF_INET6, SOCK_DGRAM, 0);
 
-            auto &underlying_addr = endpoint_.get_underlying_addr_v6();
+            const auto &underlying_addr = endpoint_.get_underlying_addr_v6();
             addr = reinterpret_cast<const sockaddr *>(&underlying_addr);
             addr_len = sizeof(underlying_addr);
 

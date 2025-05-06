@@ -27,7 +27,6 @@ SOFTWARE.
 #include "net-include.hpp"
 #include <string>
 #include <cstdint> // uint16_t
-#include <string>
 
 
 namespace udptr {

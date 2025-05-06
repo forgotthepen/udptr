@@ -32,9 +32,9 @@ SOFTWARE.
 namespace udptr {
     class receiver {
         private:
-            adapter &my_adapter_;
-            unsigned long max_recv_buff_size = 0;
-    
+            const adapter *my_adapter_;
+            unsigned long recv_buff_size = 0;
+
         public:
             constexpr static unsigned long MIN_RECEIVE_BUFFER_SIZE = 8192;
             constexpr static unsigned long MAX_RECEIVE_BUFFER_SIZE = 65536;
@@ -47,7 +47,7 @@ namespace udptr {
                 t_data(e_mode mode) noexcept(false);
             };
 
-            receiver(adapter &my_adapter) noexcept(false);
+            receiver(const adapter &my_adapter) noexcept(false);
             t_data receive(int millisec = -1) noexcept(false);
         };
 }

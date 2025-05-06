@@ -33,7 +33,7 @@ SOFTWARE.
 namespace udptr {
     class sender {
     private:
-        adapter &my_adapter_;
+        const adapter *my_adapter_;
         t_endpoint server_;
         const struct sockaddr *server_addr{};
         socklen_t server_addr_len{};
@@ -41,7 +41,7 @@ namespace udptr {
         t_endpoint ensure_compat_server(const t_endpoint &server) noexcept(false);
 
     public:
-        sender(adapter &my_adapter, const t_endpoint &server) noexcept(false);
+        sender(const adapter &my_adapter, const t_endpoint &server) noexcept(false);
 
         void send(const char *data, std::size_t size) noexcept(false);
     };

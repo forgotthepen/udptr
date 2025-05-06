@@ -34,12 +34,12 @@ namespace udptr {
     {
         std::memset(&addr_, 0, sizeof(addr_));
         switch (mode) {
-        case e_mode::v4: {
+        case e_mode::ip_v4: {
             addr_.v4_.sin_family = AF_INET;
         }
         break;
 
-        case e_mode::v6: {
+        case e_mode::ip_v6: {
             addr_.v6_.sin6_family = AF_INET6;
         }
         break;
@@ -63,12 +63,12 @@ namespace udptr {
 
     std::string t_endpoint::get_ip() const noexcept(false) {
         switch (mode_) {
-        case e_mode::v4: {
+        case e_mode::ip_v4: {
             return common::get_ip(addr_.v4_);
         }
         break;
 
-        case e_mode::v6: {
+        case e_mode::ip_v6: {
             return common::get_ip(addr_.v6_);
         }
         break;
@@ -80,12 +80,12 @@ namespace udptr {
 
     uint16_t t_endpoint::get_port() const noexcept {
         switch (mode_) {
-        case e_mode::v4: {
+        case e_mode::ip_v4: {
             return common::get_port(addr_.v4_);
         }
         break;
 
-        case e_mode::v6: {
+        case e_mode::ip_v6: {
             return common::get_port(addr_.v6_);
         }
         break;
@@ -100,7 +100,7 @@ namespace udptr {
     }
 
     sockaddr_in& t_endpoint::get_underlying_addr_v4() noexcept(false) {
-        if (mode_ != e_mode::v4) {
+        if (mode_ != e_mode::ip_v4) {
             throw std::runtime_error("Invalid mode for underlying v4 addr");
         }
 
@@ -112,7 +112,7 @@ namespace udptr {
     }
 
     sockaddr_in6& t_endpoint::get_underlying_addr_v6() noexcept(false) {
-        if (mode_ != e_mode::v6) {
+        if (mode_ != e_mode::ip_v6) {
             throw std::runtime_error("Invalid mode for underlying v6 addr");
         }
 
@@ -121,12 +121,12 @@ namespace udptr {
 
     t_endpoint& t_endpoint::use_ip(const std::string &ip) noexcept(false) {
         switch (mode_) {
-        case e_mode::v4: {
+        case e_mode::ip_v4: {
             common::set_ip(addr_.v4_, ip);
         }
         break;
 
-        case e_mode::v6: {
+        case e_mode::ip_v6: {
             common::set_ip(addr_.v6_, ip);
         }
         break;
@@ -137,12 +137,12 @@ namespace udptr {
 
     t_endpoint& t_endpoint::use_port(uint16_t port) noexcept {
         switch (mode_) {
-        case e_mode::v4: {
+        case e_mode::ip_v4: {
             common::set_port(addr_.v4_, port);
         }
         break;
 
-        case e_mode::v6: {
+        case e_mode::ip_v6: {
             common::set_port(addr_.v6_, port);
         }
         break;
