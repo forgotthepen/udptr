@@ -32,7 +32,7 @@ namespace udptr {
     class adapter {
     private:
         t_endpoint endpoint_;
-        int socket_fd_ = common::INVALID_SOCKET;
+        int socket_fd_ = common::INVALID_SOCKET_FD;
 
     public:
         adapter(t_endpoint endpoint) noexcept;

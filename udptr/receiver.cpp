@@ -27,8 +27,13 @@ SOFTWARE.
 #include "net-include.hpp"
 #include <utility>
 #include <string>
-#include <cerrno> // errno
 #include <stdexcept>
+
+
+#ifdef _MSC_VER
+    // link with ws2_32.lib
+    #pragma comment(lib, "Ws2_32.lib")
+#endif
 
 
 namespace udptr {
@@ -40,7 +45,16 @@ namespace udptr {
         my_adapter_(my_adapter)
     {
         auto opt_len = static_cast<socklen_t>(sizeof(max_recv_buff_size));
-        getsockopt(my_adapter_.get_underlying_socket(), SOL_SOCKET, SO_RCVBUF, &max_recv_buff_size, &opt_len);
+
+        auto val_ptr =
+#ifdef _MSC_VER
+            reinterpret_cast<char *>(&max_recv_buff_size)
+#else
+            reinterpret_cast<void *>(&max_recv_buff_size)
+#endif
+        ;
+
+        ::getsockopt(my_adapter_.get_underlying_socket(), SOL_SOCKET, SO_RCVBUF, val_ptr, &opt_len);
         if (max_recv_buff_size < MIN_RECEIVE_BUFFER_SIZE) {
             max_recv_buff_size = MIN_RECEIVE_BUFFER_SIZE;
         }
@@ -86,7 +100,7 @@ namespace udptr {
 
         int select_ret = ::select(my_adapter_.get_underlying_socket() + 1, &read_fd_set, nullptr, nullptr, timeout_ptr);
         if (select_ret < 0) {
-            throw std::runtime_error("Failed to poll on the socket file descriptor, errno=" + std::to_string(errno));
+            throw std::runtime_error("Failed to poll on the socket file descriptor, error code=" + std::to_string(LAST_NET_ERR()));
         } else if (0 == select_ret) {
             ret.timeout = true;
             return ret;
@@ -100,7 +114,7 @@ namespace udptr {
         );
 
         if (received_bytes < 0) {
-            throw std::runtime_error("Failed to receive udp packet, errno=" + std::to_string(errno));
+            throw std::runtime_error("Failed to receive udp packet, error code=" + std::to_string(LAST_NET_ERR()));
         } else {
             if (received_bytes > 0) {
                 ret.data.assign(data.begin(), data.begin() + received_bytes);

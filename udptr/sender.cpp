@@ -24,8 +24,13 @@ SOFTWARE.
 
 #include "sender.hpp"
 #include <string> // std::to_string
-#include <cerrno> // errno
 #include <stdexcept>
+
+
+#ifdef _MSC_VER
+    // link with ws2_32.lib
+    #pragma comment(lib, "Ws2_32.lib")
+#endif
 
 
 namespace udptr {
@@ -76,7 +81,7 @@ namespace udptr {
         );
 
         if (sent_bytes < 0) {
-            throw std::runtime_error("Failed to send udp packet, errno=" + std::to_string(errno));
+            throw std::runtime_error("Failed to send udp packet, error code=" + std::to_string(LAST_NET_ERR()));
         } else if (sent_bytes != size) {
             throw std::runtime_error("Sent only " + std::to_string(sent_bytes) + " out of " + std::to_string(size) + " bytes");
         }

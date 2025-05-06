@@ -26,8 +26,13 @@ SOFTWARE.
 #include <utility> // std::move
 #include <cstdlib> // std::size_t
 #include <cstring> // std::memcmp
-#include <cerrno> // errno
 #include <stdexcept>
+
+
+#ifdef _MSC_VER
+    // link with ws2_32.lib
+    #pragma comment(lib, "Ws2_32.lib")
+#endif
 
 
 namespace udptr {
@@ -40,7 +45,7 @@ namespace udptr {
     }
 
     void adapter::use_config(t_endpoint endpoint) noexcept(false) {
-        if (common::INVALID_SOCKET != socket_fd_) {
+        if (common::INVALID_SOCKET_FD != socket_fd_) {
             throw std::runtime_error("Adapter is already initialized, close it first");
         }
 
@@ -56,8 +61,19 @@ namespace udptr {
     }
 
     void adapter::open() noexcept(false) {
-        if (socket_fd_ != common::INVALID_SOCKET) {
+        if (socket_fd_ != common::INVALID_SOCKET_FD) {
             return;
+        }
+
+        {
+#ifdef _MSC_VER
+            WSADATA wsaData{};
+            int wsaerr = ::WSAStartup(MAKEWORD(2, 0), &wsaData);
+            if (0 != wsaerr) {
+                close();
+                throw std::runtime_error("Call to WSAStartup() failed, error code=" + std::to_string(wsaerr));
+            }
+#endif
         }
 
         const sockaddr *addr{};
@@ -94,15 +110,24 @@ namespace udptr {
 
         if (socket_fd_ < 0) {
             close();
-            throw std::runtime_error("Failed to create a socket file descriptor, errno=" + std::to_string(errno));
+            throw std::runtime_error("Failed to create a socket file descriptor, error code=" + std::to_string(LAST_NET_ERR()));
         }
 
         {
             int allow_multicast = 1;
-            int socket_opt = ::setsockopt(socket_fd_, SOL_SOCKET, SO_REUSEADDR, &allow_multicast, sizeof(allow_multicast));
+            
+            auto val_ptr =
+#ifdef _MSC_VER
+                reinterpret_cast<const char *>(&allow_multicast)
+#else
+                reinterpret_cast<const void *>(&allow_multicast)
+#endif
+            ;
+
+            int socket_opt = ::setsockopt(socket_fd_, SOL_SOCKET, SO_REUSEADDR, val_ptr, static_cast<socklen_t>(sizeof(allow_multicast)));
             if (socket_opt < 0) {
                 close();
-                throw std::runtime_error("Failed to set SO_REUSEADDR option, errno=" + std::to_string(errno));
+                throw std::runtime_error("Failed to set SO_REUSEADDR option, error code=" + std::to_string(LAST_NET_ERR()));
             }
         }
 
@@ -110,16 +135,20 @@ namespace udptr {
             auto ret = ::bind(socket_fd_, addr, static_cast<socklen_t>(addr_len));
             if (0 != ret) {
                 close();
-                throw std::runtime_error("Failed to bind a socket file descriptor to adapter, errno=" + std::to_string(errno));
+                throw std::runtime_error("Failed to bind a socket file descriptor to adapter, error code=" + std::to_string(LAST_NET_ERR()));
             }
         }
     }
 
     void adapter::close() noexcept {
-        if (common::INVALID_SOCKET != socket_fd_) {
+        if (common::INVALID_SOCKET_FD != socket_fd_) {
+#ifdef _MSC_VER
+            ::closesocket(socket_fd_);
+#else
             ::close(socket_fd_);
+#endif
         }
 
-        socket_fd_ = common::INVALID_SOCKET;
+        socket_fd_ = common::INVALID_SOCKET_FD;
     }
 }

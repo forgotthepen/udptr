@@ -32,7 +32,7 @@ SOFTWARE.
 
 namespace udptr {
 namespace common {
-    constexpr static const int INVALID_SOCKET = -1;
+    constexpr static const int INVALID_SOCKET_FD = -1;
 
     std::string get_ip(const struct sockaddr_in &addr) noexcept(false);
     std::string get_ip(const struct sockaddr_in6 &addr) noexcept(false);

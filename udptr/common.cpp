@@ -24,8 +24,13 @@ SOFTWARE.
 
 #include "common.hpp"
 #include <cstring> // std::memset
-#include <cerrno> // errno
 #include <stdexcept>
+
+
+#ifdef _MSC_VER
+    // link with ws2_32.lib
+    #pragma comment(lib, "Ws2_32.lib")
+#endif
 
 
 namespace udptr {
@@ -34,7 +39,7 @@ namespace common {
         char ip[INET_ADDRSTRLEN]{};
         auto ret = ::inet_ntop(AF_INET, &addr.sin_addr, ip, sizeof(ip));
         if (nullptr == ret) {
-            throw std::runtime_error("IPv4 address conversion failed, errno=" + std::to_string(errno));
+            throw std::runtime_error("IPv4 address conversion failed, error code=" + std::to_string(LAST_NET_ERR()));
         }
         return ip;
     }
@@ -43,7 +48,7 @@ namespace common {
         char ip[INET6_ADDRSTRLEN]{};
         auto ret = ::inet_ntop(AF_INET6, &addr.sin6_addr, ip, sizeof(ip));
         if (nullptr == ret) {
-            throw std::runtime_error("IPv6 address conversion failed, errno=" + std::to_string(errno));
+            throw std::runtime_error("IPv6 address conversion failed, error code=" + std::to_string(LAST_NET_ERR()));
         }
         return ip;
     }
@@ -59,14 +64,14 @@ namespace common {
     void set_ip(struct sockaddr_in &addr, const std::string &ip) noexcept(false) {
         auto ret = ::inet_pton(AF_INET, ip.c_str(), &addr.sin_addr);
         if (ret <= 0) {
-            throw std::runtime_error("IPv4 address conversion failed, errno=" + std::to_string(errno));
+            throw std::runtime_error("IPv4 address conversion failed, error code=" + std::to_string(LAST_NET_ERR()));
         }
     }
 
     void set_ip(struct sockaddr_in6 &addr, const std::string &ip) noexcept(false) {
         auto ret = ::inet_pton(AF_INET6, ip.c_str(), &addr.sin6_addr);
         if (ret <= 0) {
-            throw std::runtime_error("IPv6 address conversion failed, errno=" + std::to_string(errno));
+            throw std::runtime_error("IPv6 address conversion failed, error code=" + std::to_string(LAST_NET_ERR()));
         }
     }
 
