@@ -5,7 +5,7 @@ on:
     paths:
       - '**.cpp'
       - '**.hpp'
-      - '**.bash'
+      - '**.sh'
   workflow_dispatch:
   pull_request:
 
