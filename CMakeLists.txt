@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(project_name "poc-tpl-test")
+set(project_name "udptr-test")
 
 project(${project_name})
 
