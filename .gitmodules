@@ -1,3 +1,0 @@
-[submodule "libs/observable-queue"]
-	path = libs/observable-queue
-	url = https://github.com/forgotthepen/observable-queue.git

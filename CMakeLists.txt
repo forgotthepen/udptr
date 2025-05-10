@@ -8,7 +8,6 @@ file(GLOB_RECURSE src_files
     "test/*.cpp"
     "udptr/*.cpp"
     "udptr/*.hpp"
-    "libs/observable-queue/observable/*.hpp"
 )
 
 add_executable(${project_name}
@@ -17,7 +16,6 @@ add_executable(${project_name}
 
 target_include_directories(${project_name} PUBLIC
     "./"
-    "libs/observable-queue/"
 )
 
 set_target_properties(${project_name} PROPERTIES
